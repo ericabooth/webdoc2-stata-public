@@ -1,6 +1,6 @@
 # webdoc2
 
-**A Bootstrap‑5 reporting wrapper for Ben Jann's [`webdoc`](https://ideas.repec.org/c/boc/bocode/s458530.html) — turn a Stata do‑file into a full HTML report without writing HTML.**
+**A Bootstrap‑5 reporting wrapper for Ben Jann's [`webdoc`](https://ideas.repec.org/c/boc/bocode/s458530.html) — turn a Stata do‑file into a full HTML report without writing HTML. This program greatly benefits from the Stata programming of Ben Jann see: [https://github.com/benjann](https://github.com/benjann)**
 
 `webdoc2` is a thin layer of conveniences on top of `webdoc`. You keep writing Stata. `webdoc2` gives you short, semantic commands (`wputh1`, `button`, `graphbutton`, `wdnavbar`, `wdtoc`, …) that compile to a polished, responsive, Bootstrap‑5‑themed HTML document — collapsible code panels, in‑page table of contents, navbar with anchor‑linked dropdowns, captioned figures, embedded iframes, the works.
 
