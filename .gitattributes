@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.ado    text eol=lf
+*.sthlp  text eol=lf
+*.do     text eol=lf
+*.pkg    text eol=lf
+*.toc    text eol=lf
+*.md     text eol=lf
+*.html   text eol=lf

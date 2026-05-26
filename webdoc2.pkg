@@ -1,0 +1,52 @@
+v 3
+d webdoc2. Bootstrap-5 reporting wrapper for Ben Jann's webdoc -- HTML reports
+d from Stata with minimal HTML coding.
+d
+d webdoc2 is a post-processor and shortcut suite for webdoc that makes literate
+d HTML reporting from a do-file fast: shorthand tags for headings, paragraphs,
+d collapsible code/graph accordions, navbars with dropdowns, in-page TOC,
+d images, lists, page width, and iframes for embedded dashboards.
+d
+d Requires: Stata 11+, and webdoc (from SSC) by Ben Jann.
+d
+d KW: webdoc
+d KW: html
+d KW: bootstrap
+d KW: reporting
+d KW: literate programming
+d KW: reproducible research
+d
+d Author: Eric A. Booth, Texas 2036
+d Support: eric.a.booth@gmail.com
+d Distribution-Date: 20260526
+d
+f webdoc2.ado
+f webdoc2.sthlp
+f button.ado
+f buttonclose.ado
+f graphbutton.ado
+f graphbuttonclose.ado
+f wd.ado
+f wdclose.ado
+f wgraph.ado
+f wput.ado
+f wputh1.ado
+f wputh2.ado
+f wputh3.ado
+f wdnavbar.ado
+f wdnavitem.ado
+f wdnavbarclose.ado
+f wdnavdropdown.ado
+f wdnavdropdownitem.ado
+f wdnavdropdownclose.ado
+f wdinit.ado
+f wdtoc.ado
+f wdwidth.ado
+f wdiframe.ado
+f wdimg.ado
+f wdlist.ado
+f wditemize.ado
+f wdenumerate.ado
+f wditem.ado
+f wdlistend.ado
+f header.html

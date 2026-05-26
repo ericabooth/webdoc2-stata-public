@@ -1,0 +1,3 @@
+v 3
+d webdoc2: Bootstrap-5 reporting wrapper for Ben Jann's webdoc -- HTML reports from Stata with minimal HTML coding
+p webdoc2
