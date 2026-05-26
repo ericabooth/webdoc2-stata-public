@@ -270,6 +270,8 @@ Open the rendered HTML, open the browser's JS console (`Cmd-Option-J` in Chrome 
 
 `webdoc2` calls into `webdoc` internals. Pin to the version of `webdoc` that was current when you installed `webdoc2`, or open an issue with the `webdoc` version string from `which webdoc`.
 
+
+Example site it produces is here: [https://ericabooth.github.io/Webdoc2_Example_Site/](https://ericabooth.github.io/Webdoc2_Example_Site/)
 ---
 
 ## Acknowledgments
