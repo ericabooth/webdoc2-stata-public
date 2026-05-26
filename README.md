@@ -274,7 +274,7 @@ Open the rendered HTML, open the browser's JS console (`Cmd-Option-J` in Chrome 
 
 ## Acknowledgments
 
-`webdoc2` is built on top of **`webdoc`** by **Ben Jann** (ETH Zürich). Install it from SSC: `ssc install webdoc`. Without `webdoc` doing the actual literate‑programming work, none of this layer exists.
+`webdoc2` is built on top of **`webdoc`** by **Ben Jann** (University of Bern). Install it from SSC: `ssc install webdoc`. Without `webdoc` doing the actual literate‑programming work, none of this layer exists.
 
 The Bootstrap‑5 theme draws from the upstream Bootstrap CDN and a small amount of hand‑rolled CSS in `header.html`.
 
