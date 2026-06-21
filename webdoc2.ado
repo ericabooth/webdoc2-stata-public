@@ -80,7 +80,7 @@ if "`open'" != "" {
     di as txt `"Opening: `htmlpath'"'
     cap file close _wd2_fh
     tempfile _wd2_sh
-    if "`c(os)'" == "MacOSX" {
+    if ("`c(os)'" == "MacOSX") | regexm("`c(machine_type)'", "Mac") {     // Apple-Silicon Stata reports c(os)=="Unix"
         cap file open _wd2_fh using "`_wd2_sh'", write text replace
         if !_rc {
             file write _wd2_fh "/usr/bin/open " _char(34) `"`htmlpath'"' _char(34) _n
