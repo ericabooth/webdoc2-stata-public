@@ -60,7 +60,7 @@ That comes from SSC and is a hard dependency. `webdoc2` will not work without it
 
 ```stata
 net install webdoc2, ///
-    from("https://raw.githubusercontent.com/ericabooth/webdoc2-stata-public/main/") ///
+    from("https://raw.githubusercontent.com/ericbooth/webdoc2-stata/master/") ///
     replace
 ```
 
@@ -80,7 +80,7 @@ If `which header.html` errors with `r(601)`, `wdinit` won't be able to inject th
 
 ```stata
 ado uninstall webdoc2
-net install webdoc2, from("https://raw.githubusercontent.com/ericabooth/webdoc2-stata-public/main/") replace
+net install webdoc2, from("https://raw.githubusercontent.com/ericbooth/webdoc2-stata/master/") replace
 ```
 
 ### Manual install (no internet)
@@ -284,6 +284,6 @@ The Bootstrap‑5 theme draws from the upstream Bootstrap CDN and a small amount
 
 ## Author
 
-Eric A. Booth · Texas 2036 · [eric.a.booth@gmail.com](mailto:eric.a.booth@gmail.com) · [@ericabooth](https://github.com/ericabooth)
+Eric A. Booth, Sr Researcher, Texas2036.org (eric.a.booth@gmail.com).
 
 Issues and PRs welcome at [github.com/ericabooth/webdoc2-stata-public](https://github.com/ericabooth/webdoc2-stata-public).
