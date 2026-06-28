@@ -60,7 +60,7 @@ That comes from SSC and is a hard dependency. `webdoc2` will not work without it
 
 ```stata
 net install webdoc2, ///
-    from("https://raw.githubusercontent.com/ericbooth/webdoc2-stata/master/") ///
+    from("https://raw.githubusercontent.com/ericabooth/webdoc2-stata/master/") ///
     replace
 ```
 
@@ -80,7 +80,7 @@ If `which header.html` errors with `r(601)`, `wdinit` won't be able to inject th
 
 ```stata
 ado uninstall webdoc2
-net install webdoc2, from("https://raw.githubusercontent.com/ericbooth/webdoc2-stata/master/") replace
+net install webdoc2, from("https://raw.githubusercontent.com/ericabooth/webdoc2-stata/master/") replace
 ```
 
 ### Manual install (no internet)
