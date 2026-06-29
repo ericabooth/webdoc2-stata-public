@@ -32,6 +32,8 @@ That's a complete, navigable HTML report. Run `webdoc2 quickstart.do, open` and 
 
 ---
 
+<img width="720" height="405" alt="Slide1" src="https://github.com/user-attachments/assets/91a8c759-0048-48d9-abfc-0d7b91580025" />
+
 ## Why you'd reach for this
 
 - **Literate programming in plain Stata.** Headings, paragraphs, code blocks, graphs, lists, navbars — every output type is a one-word command (`wputh2`, `button`, `wdlist`, `wdnavbar`…). No `<div class="...">` boilerplate, no HTML escapes, no JavaScript to wire up.
@@ -43,6 +45,8 @@ That's a complete, navigable HTML report. Run `webdoc2 quickstart.do, open` and 
 - **One command to build + open + clean up.** `webdoc2 myreport.do, open cleanup` runs the do-file, scrubs the intermediate logs, and opens the HTML in your default browser.
 
 ---
+
+<img width="720" height="405" alt="Slide2" src="https://github.com/user-attachments/assets/90835d58-5f33-4c3a-a58b-1888ba817583" />
 
 ## Installation
 
