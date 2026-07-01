@@ -84,7 +84,11 @@ If `which header.html` errors with `r(601)`, `wdinit` won't be able to inject th
 
 ```stata
 ado uninstall webdoc2
-net install webdoc2, from("https://raw.githubusercontent.com/ericabooth/webdoc2-stata/master/") replace
+net install webdoc2, from("https://raw.githubusercontent.com/ericabooth/webdoc2-stata-public/master/") replace
+discard
+which webdoc2
+help webdoc2
+
 ```
 
 ### Manual install (no internet)
