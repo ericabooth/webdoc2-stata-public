@@ -3,6 +3,7 @@
 
 *cap program drop wput
 program define  wput
+version 14
 * Bypass syntax entirely so unquoted commas are allowed.
 * local text `0' also strips any outer double-quotes the user may have added.
 local text `0'

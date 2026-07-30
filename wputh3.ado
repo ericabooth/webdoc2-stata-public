@@ -2,6 +2,7 @@
 *!          Slug rule: lowercase, runs of non-alphanumeric chars → "-", trimmed.
 *cap program drop wputh3
 program define wputh3
+version 14
 local text `0'
 
 local id = lower(`"`text'"')

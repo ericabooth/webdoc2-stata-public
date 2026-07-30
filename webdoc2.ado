@@ -13,6 +13,7 @@
 
 **main program goes last so that others get recognized as subroutines!
  program  webdoc2, rclass
+version 14
 * open:    open the output HTML in the default browser after building
 * cleanup: delete intermediate .log/.smcl files after building (PNG graphs kept)
 syntax [anything] [, open Cleanup *]

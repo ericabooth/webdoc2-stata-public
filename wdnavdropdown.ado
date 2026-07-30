@@ -4,6 +4,7 @@
 *!   then close with wdnavdropdownclose.
 *cap program drop wdnavdropdown
 program define wdnavdropdown
+version 14
 syntax [anything(equalok everything)] [, Id(string)]
 local anything = `"`anything'"'
 if `"`anything'"' == "" local anything "Contents"

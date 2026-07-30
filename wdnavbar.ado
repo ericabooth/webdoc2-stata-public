@@ -1,6 +1,7 @@
 *! wdnavbar - Open a Bootstrap 5 navbar (use with wdnavitem / wdnavbarclose)
 *cap program drop wdnavbar
 program define wdnavbar
+version 14
 syntax [anything(equalok everything)] [, Color(string) Bg(string) BrandHref(string) Id(string)]
 local anything = `"`anything'"'
 if "`color'"     == "" local color     "navbar-dark"

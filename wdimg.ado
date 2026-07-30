@@ -8,6 +8,7 @@
 *!                            styled rendering via header.html's figure CSS.
 *cap program drop wdimg
 program define wdimg
+version 14
 syntax [anything(equalok everything)] [, SRC(string) Width(string) Alt(string) Caption(string)]
 
 * Strip any outer double-quotes the user typed around the positional arg.

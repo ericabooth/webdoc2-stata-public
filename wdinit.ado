@@ -3,6 +3,7 @@
 *!          Custom:  wdinit myfile, replace headerfile("mytheme.html")
 *cap program drop wdinit
 program define wdinit
+version 14
 syntax [anything(id="document name")] [, HeaderFile(string) *]
 
 * Determine which header file to inject

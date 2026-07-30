@@ -4,6 +4,7 @@
 *!                   wdwidth       (resets to default 90%)
 *cap program drop wdwidth
 program define wdwidth
+version 14
 syntax [anything(equalok everything)]
 local anything = `"`anything'"'
 if `"`anything'"' == "" local anything "90%"

@@ -8,6 +8,7 @@
 *!            rounded corners + drop shadow + vertical margin.
 *cap program drop wdiframe
 program define wdiframe
+version 14
 syntax [anything(equalok everything)] [, SRC(string) Width(string) ///
         Height(string) Class(string) Border]
 

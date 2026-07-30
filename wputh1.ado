@@ -6,6 +6,7 @@
 *!          To use a custom id, write the <h1> yourself with webdoc put.
 *cap program drop wputh1
 program define wputh1
+version 14
 local text `0'
 
 * Slugify the heading text into an id.

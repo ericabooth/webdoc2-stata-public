@@ -10,6 +10,7 @@
 *!           depth(N)      heading levels to include, 1-6 (default 3 = h1+h2+h3)
 *cap program drop wdtoc
 program define wdtoc
+version 14
 syntax [anything(equalok everything)] [, Id(string) Center Indent(string) Depth(integer 3)]
 
 local anything = `"`anything'"'

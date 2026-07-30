@@ -3,6 +3,7 @@
 *!             For dashed markers see wdlist; for numbers see wdenumerate.
 *cap program drop wditemize
 program define wditemize
+version 14
 syntax
 global wdlist_tag "ul"
 webdoc put <ul>

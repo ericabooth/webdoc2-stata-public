@@ -1,6 +1,7 @@
 *! wdnavitem - Add one nav link inside a wdnavbar block
 *cap program drop wdnavitem
 program define wdnavitem
+version 14
 syntax [anything(equalok everything)] [, Href(string) Active]
 local anything = `"`anything'"'
 if "`active'" != "" {
