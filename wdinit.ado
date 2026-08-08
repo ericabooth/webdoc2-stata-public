@@ -4,7 +4,10 @@
 *cap program drop wdinit
 program define wdinit
 version 14
-syntax [anything(id="document name")] [, HeaderFile(string) *]
+* HEADERFile, not HeaderFile: syntax option capitals must be an initial
+* substring, and the malformed form made a typed headerfile() fall through
+* to the * catch-all silently -- the option never worked as documented.
+syntax [anything(id="document name")] [, HEADERFile(string) *]
 
 * Determine which header file to inject
 if `"`headerfile'"' == "" {
