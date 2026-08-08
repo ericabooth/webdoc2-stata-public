@@ -70,9 +70,9 @@ net install webdoc2, ///
 
 This drops ~28 `.ado` files and the help file into your `PLUS` directory.
 
-### 3. Get `header.html` (required — `net install` will not place it)
+### 3. Get `header.html` (for the Bootstrap theme — `net install` will not place it)
 
-`net install` copies only recognised extensions (`.ado`, `.sthlp`, …), so `header.html` — the Bootstrap‑5 CSS/JS template — is an **ancillary** file. `net get` fetches it into the current directory:
+`net install` copies only recognised extensions (`.ado`, `.sthlp`, …), so `header.html` — the Bootstrap‑5 CSS/JS template — is an **ancillary** file. Two situations need no fetch at all: `wdinit myfile, replace headerfile("mytheme.html")` injects any header file you name (the `headerfile()` option works as of the Aug 2026 fix; earlier copies silently ignored it), and projects scaffolded by `projectbuilder` v2.1.0+ ship their own fallback header, so their docs render with nothing beyond this install. For webdoc2's own Bootstrap theme, `net get` fetches it into the current directory:
 
 ```stata
 net get webdoc2, from("https://raw.githubusercontent.com/ericabooth/webdoc2-stata-public/main/")
@@ -92,7 +92,7 @@ capture confirm file header.html   // rc=0 means wdinit can find it
 help  webdoc2          // shows the full reference
 ```
 
-If `header.html` is missing, `wdinit` won't be able to inject the Bootstrap header. See [Troubleshooting](#troubleshooting) below.
+If `header.html` is missing and no `headerfile()` is named, `wdinit` stops and says so. See [Troubleshooting](#troubleshooting) below.
 
 ### Re-installing later
 
