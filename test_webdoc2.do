@@ -63,11 +63,25 @@ di as res "TEST 2 OK: body, h1, and Bootstrap header all present"
 assert strpos(`"`html'"', "<h1") > 0
 di as res "TEST 3 OK: heading rendered as an <h1> tag"
 
-*--- (4) outside webdoc do, the wrappers refuse gracefully --------------------*
+*--- (4) rerunning webdoc do over existing output must not r(602) -------------*
+* webdoc do injects its own optionless -webdoc init "inner"- because wdinit is
+* invisible to its textual scan for init commands. The stray inner.html that
+* init created made every rerun die with r(602) before wdinit executed; wdinit
+* now removes the stray when it takes over, so a second pass replaces cleanly.
+confirm new file "`site'/inner.html"
+capture noisily webdoc do inner.do
+assert _rc == 0
+confirm file "`site'/testpage.html"
+local html = fileread("`site'/testpage.html")
+assert strpos(`"`html'"', "battery body text") > 0
+confirm new file "`site'/inner.html"
+di as res "TEST 4 OK: rerun with existing HTML replaces cleanly (no r(602))"
+
+*--- (5) outside webdoc do, the wrappers refuse gracefully --------------------*
 capture noisily wdinit failpage, replace
 assert _rc == 0
 confirm new file "`site'/failpage.html"
-di as res "TEST 4 OK: outside webdoc do, wdinit declines and writes nothing"
+di as res "TEST 5 OK: outside webdoc do, wdinit declines and writes nothing"
 
 cd "`wd0'"
 capture shell rm -rf "`site'"
