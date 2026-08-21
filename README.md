@@ -63,9 +63,7 @@ That comes from SSC and is a hard dependency. `webdoc2` will not work without it
 ### 2. Install `webdoc2` itself from GitHub
 
 ```stata
-net install webdoc2, ///
-    from("https://raw.githubusercontent.com/ericabooth/webdoc2-stata-public/main/") ///
-    replace force
+net install webdoc2, from("https://raw.githubusercontent.com/ericabooth/webdoc2-stata-public/main/") replace force
 ```
 
 This drops ~28 `.ado` files and the help file into your `PLUS` directory.
