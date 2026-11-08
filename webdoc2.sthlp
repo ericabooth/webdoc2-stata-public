@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1.2 23may2026 Author: Eric Booth}{...}
+{* *! version 1.1.4 08nov2026 Author: Eric Booth}{...}
 {vieweralsosee "[P] webdoc" "help webdoc"}{...}
 {viewerjumpto "Syntax" "webdoc2##syntax"}{...}
 {viewerjumpto "Description" "webdoc2##description"}{...}

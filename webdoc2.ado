@@ -1,4 +1,4 @@
-*! Custom webdoc2 :  version 1.1.3 20260523 Eric Booth
+*! Custom webdoc2 :  version 1.1.4 20261108 Eric Booth
 *!
 *! Note: Custom subcommands include:
 *!       wd and  wdclose

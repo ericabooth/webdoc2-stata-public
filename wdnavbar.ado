@@ -1,8 +1,11 @@
 *! wdnavbar - Open a Bootstrap 5 navbar (use with wdnavitem / wdnavbarclose)
+*! 2026-11-08 (webdoc2 1.1.4): BRANDhref replaces BrandHref, which Stata never
+*!   matched to brandhref() on any version (r(198)); minimum abbreviation is
+*!   brand, so it does not collide with bg().
 *cap program drop wdnavbar
 program define wdnavbar
 version 14
-syntax [anything(equalok everything)] [, Color(string) Bg(string) BrandHref(string) Id(string)]
+syntax [anything(equalok everything)] [, Color(string) Bg(string) BRANDhref(string) Id(string)]
 local anything = `"`anything'"'
 if "`color'"     == "" local color     "navbar-dark"
 if "`bg'"        == "" local bg        "bg-dark"
