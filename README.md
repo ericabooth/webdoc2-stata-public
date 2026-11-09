@@ -68,15 +68,15 @@ net install webdoc2, from("https://raw.githubusercontent.com/ericabooth/webdoc2-
 
 This drops ~28 `.ado` files and the help file into your `PLUS` directory.
 
-### 3. Get `header.html` (for the Bootstrap theme — `net install` will not place it)
+### 3. (Optional) Get an editable `header.html`
 
-`net install` copies only recognised extensions (`.ado`, `.sthlp`, …), so `header.html` — the Bootstrap‑5 CSS/JS template — is an **ancillary** file. Two situations need no fetch at all: `wdinit myfile, replace headerfile("mytheme.html")` injects any header file you name (the `headerfile()` option works as of the Aug 2026 fix; earlier copies silently ignored it), and projects scaffolded by `projectbuilder` v2.1.0+ ship their own fallback header, so their docs render with nothing beyond this install. For webdoc2's own Bootstrap theme, `net get` fetches it into the current directory:
+`net install` copies only recognised extensions (`.ado`, `.sthlp`, …), so `header.html` — the Bootstrap‑5 CSS/JS template — is an **ancillary** file. Since 1.1.5 you do not need it: when no `header.html` is in the working directory or on the adopath, `wdinit` uses an identical built-in copy stored in `_webdoc2_header.ado`, which `net install` and `ssc install` do place. Fetch the file only to edit it into a custom theme. To get the editable copy, run `net get`, which places it in the current directory:
 
 ```stata
 net get webdoc2, from("https://raw.githubusercontent.com/ericabooth/webdoc2-stata-public/main/")
 ```
 
-`wdinit` reads `header.html` from the current directory, so run your report build from the folder you dropped it in. To make it available everywhere instead, copy it once onto your adopath:
+`wdinit` prefers a `header.html` in the current directory, so run your report build from the folder you dropped it in. To make it available everywhere instead, copy it once onto your adopath:
 
 ```stata
 copy header.html "`c(sysdir_personal)'header.html", replace
@@ -86,11 +86,11 @@ copy header.html "`c(sysdir_personal)'header.html", replace
 
 ```stata
 which webdoc2          // should print the .ado path
-capture confirm file header.html   // rc=0 means wdinit can find it
+findfile _webdoc2_header.ado      // built-in header that wdinit falls back to
 help  webdoc2          // shows the full reference
 ```
 
-If `header.html` is missing and no `headerfile()` is named, `wdinit` stops and says so. See [Troubleshooting](#troubleshooting) below.
+If `header.html` is missing and no `headerfile()` is named, `wdinit` uses the built-in header. `headerfile()` accepts absolute paths, paths relative to the working directory, `~/` paths, and file names on the adopath. See [Troubleshooting](#troubleshooting) below.
 
 ### Re-installing later
 
@@ -105,7 +105,7 @@ help webdoc2
 
 ### Manual install (no internet)
 
-Drop every file from this repo (every `.ado`, the `.sthlp`, **and** `header.html`) into a folder on your Stata `adopath` — e.g. `c(sysdir_personal)`. Then `help webdoc2` should work.
+Drop every file from this repo (every `.ado` including `_webdoc2_header.ado`, the `.sthlp`, and optionally `header.html`) into a folder on your Stata `adopath` — e.g. `c(sysdir_personal)`. Then `help webdoc2` should work.
 
 ---
 
@@ -242,7 +242,7 @@ webdoc2 myreport.do [, open cleanup OPTIONS]
 | `open` | After build, open the HTML in your default browser (`open` on macOS, `start` on Windows, `xdg-open` on Linux). |
 | `cleanup` | Delete intermediate `.log` / `.smcl` files generated for each `wd`/`button`/`graphbutton` block. PNG/JPG graph files are kept (the HTML references them). |
 | `replace` | Passed through to `webdoc do` — overwrites existing HTML. |
-| other | Any other option is passed through to `webdoc do` unchanged (e.g. `logall`, `grdir()`). |
+| other | Any other option is passed through to `webdoc do` unchanged (e.g. `grdir()`). `logall` is rejected with r(198): it would wrap `wdinit` and the other webdoc2 commands in stlog sections, which stopped every build with r(499). |
 
 ---
 
@@ -257,22 +257,23 @@ These are the lessons from building real reports with `webdoc2`. The help file d
 5. **Apostrophes in possessives** (`Radyakin's`) terminate macro references mid-string. Phrase as "by X" or use `&#39;`.
 6. **`wdnavbar*` and `wdwidth` go OUTSIDE any `wd`/`button` block.** They emit HTML structure; the logger interprets them as Stata commands inside a stlog.
 7. **`else` must be on the same physical line as the preceding `}`.** Standalone `else if` lines silently fall through inside `webdoc do`.
-8. **Same-origin policy for iframes.** When you open the HTML via `file://`, iframes can only load files from the *same directory*. Either co-locate the iframe target with the report, or serve the directory with `python3 -m http.server`.
+8. **`wd` takes `webdoc stlog` options, but not `nooutput`, `nodo`, `cmdlog`, or `dosave`.** `webdoc do` applies those only to literal `webdoc stlog` lines it finds when scanning the do-file, so before 1.1.5 `wd, nooutput` published the output anyway. `wd` now stops with r(198); write `webdoc stlog, nooutput` … `webdoc stlog close` for such sections.
+9. **Same-origin policy for iframes.** When you open the HTML via `file://`, iframes can only load files from the *same directory*. Either co-locate the iframe target with the report, or serve the directory with `python3 -m http.server`.
 
 ---
 
 ## Troubleshooting
 
-**`wdinit: header.html not found`**
+**`wdinit: header.html not found ... built-in header (_webdoc2_header.ado) is not installed`**
 
-The Bootstrap‑5 template `header.html` isn't on your adopath. Check:
+Since 1.1.5 this appears only when `_webdoc2_header.ado` is missing too (for example after copying files by hand). Check:
 
 ```stata
-adopath
-which header.html
+which webdoc2
+findfile _webdoc2_header.ado
 ```
 
-The directory containing `webdoc2.ado` must also contain `header.html`. If `net install` placed the ado in `PLUS` but not the html, redo the install with `replace`. To use a custom theme: `wdinit myfile, replace headerfile("my_theme.html")`.
+Reinstall with `net install webdoc2, ... replace`, fetch `header.html` with `net get webdoc2`, or name a theme: `wdinit myfile, replace headerfile("my_theme.html")`.
 
 **`file ...file.tmp already exists`**
 
@@ -292,6 +293,13 @@ Open the rendered HTML, open the browser's JS console (`Cmd-Option-J` in Chrome 
 
 
 Example site it produces is here: [https://ericabooth.github.io/Webdoc2_Example_Site/](https://ericabooth.github.io/Webdoc2_Example_Site/)
+---
+
+## Version history
+
+- **1.1.5** (2026-11-09): `wdimg` width() and alt() reach the HTML; `wd` rejects `nooutput`, `nodo`, `cmdlog`, and `dosave` (it silently ignored them, publishing output meant to be hidden); `webdoc2, logall` stops with a clear message instead of r(499); `wdinit` no longer leaks a file handle per build (r(3611) after 48 builds in one session), falls back to a built-in header when `header.html` was not installed, and accepts absolute and `~/` paths in `headerfile()`.
+- **1.1.4** (2026-11-08): `wdnavbar` brandhref() is accepted.
+
 ---
 
 ## Acknowledgments

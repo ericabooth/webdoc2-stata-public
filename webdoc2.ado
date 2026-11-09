@@ -1,4 +1,4 @@
-*! Custom webdoc2 :  version 1.1.4 20261108 Eric Booth
+*! Custom webdoc2 :  version 1.1.5 20261109 Eric Booth
 *!
 *! Note: Custom subcommands include:
 *!       wd and  wdclose
@@ -16,7 +16,17 @@
 version 14
 * open:    open the output HTML in the default browser after building
 * cleanup: delete intermediate .log/.smcl files after building (PNG graphs kept)
-syntax [anything] [, open Cleanup *]
+syntax [anything] [, open Cleanup LOGALL *]
+* logall makes -webdoc do- wrap every command it does not recognise as a
+* webdoc command in its own stlog. wdinit, wput and the other webdoc2
+* commands are not recognised, so wdinit landed inside a log section and
+* every build stopped with r(499) "webdoc init not allowed within stlog".
+if "`logall'" != "" {
+    di as err "webdoc2: option logall is not supported; webdoc's logall wraps"
+    di as err "         wdinit and the other webdoc2 commands in stlog sections."
+    di as err "         Use wd/wdclose (or webdoc stlog) around the output to show."
+    exit 198
+}
 loc o `"`=subinstr(`"`options'"', "replace", "", .)'"'
 * Strip any outer double-quotes that syntax preserves (handles quoted paths)
 local anything `anything'

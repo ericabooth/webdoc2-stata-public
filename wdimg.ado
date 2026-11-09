@@ -1,4 +1,5 @@
 *! wdimg - Insert an image, optionally with a caption.
+*! 2026-11-09 (webdoc2 1.1.5): width() and alt() reach the HTML again.
 *!
 *!         Usage:  wdimg {it:path} [, width() alt() caption()]
 *!         or:     wdimg, src({it:path}) [...]
@@ -22,11 +23,16 @@ if `"`src'"' == "" {
     exit 198
 }
 
+* Build the attribute fragments with compound quotes and char(34). A bare
+* opening backtick (` width="...") is read as a reference to a macro named
+* ' width="..."', which expands to nothing, so width() and alt() were dropped
+* silently before webdoc2 1.1.5.
+local q = char(34)
 local widthpart ""
-if `"`width'"' != "" local widthpart ` width="`width'"'
+if `"`width'"' != "" local widthpart `" width=`q'`macval(width)'`q'"'
 
 local altpart ""
-if `"`alt'"' != "" local altpart ` alt="`alt'"'
+if `"`alt'"' != "" local altpart `" alt=`q'`macval(alt)'`q'"'
 
 if `"`caption'"' != "" {
     webdoc put <figure>

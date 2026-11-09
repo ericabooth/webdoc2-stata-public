@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1.4 08nov2026 Author: Eric Booth}{...}
+{* *! version 1.1.5 09nov2026 Author: Eric Booth}{...}
 {vieweralsosee "[P] webdoc" "help webdoc"}{...}
 {viewerjumpto "Syntax" "webdoc2##syntax"}{...}
 {viewerjumpto "Description" "webdoc2##description"}{...}
@@ -42,7 +42,7 @@ Display this help file and diagnose the environment:
 
 {phang2}{cmd:wdinit} [{it:filename}] [{cmd:,} {cmd:headerfile(}{it:path}{cmd:)} {it:webdoc_init_options}] {hline 2} Initialize a report with Bootstrap 5 (replaces {cmd:webdoc init}){p_end}
 
-{phang2}{cmd:wd} [{it:name}] [{cmd:,} {it:options}] {hline 2} Open a webdoc stlog (alias for {cmd:webdoc stlog}){p_end}
+{phang2}{cmd:wd} [{it:name}] [{cmd:,} {it:options}] {hline 2} Open a webdoc stlog (alias for {cmd:webdoc stlog}; {cmd:nooutput}, {cmd:nodo}, {cmd:cmdlog}, {cmd:dosave} not allowed){p_end}
 {phang2}{cmd:wdclose} {hline 2} Close a webdoc stlog (alias for {cmd:webdoc stlog close}){p_end}
 
 {phang2}{cmd:button} {hline 2} Open a Bootstrap accordion "Click to view code" section (starts stlog){p_end}
@@ -101,8 +101,10 @@ and Linux ({cmd:xdg-open}).{p_end}
 ({cmd:report_1.log}, {cmd:report_2.log}, ...). PNG/JPG/SVG graph files are
 kept because the HTML references them. The output HTML and any image files
 are untouched.{p_end}
-{p2col:{it:other options}}All standard {cmd:webdoc do} options pass through
-unchanged (e.g. {cmd:logall}, {cmd:grdir()}).{p_end}
+{p2col:{it:other options}}Other {cmd:webdoc do} options pass through
+unchanged (e.g. {cmd:grdir()}, {cmd:nodo}). {cmd:logall} is not supported and
+stops with r(198): it wraps {cmd:wdinit} and the other webdoc2 commands in
+stlog sections, which makes {cmd:webdoc init} fail with r(499).{p_end}
 {p2colreset}{...}
 
 
@@ -113,23 +115,36 @@ unchanged (e.g. {cmd:logall}, {cmd:grdir()}).{p_end}
 
 {phang2}
 Drop-in replacement for {cmd:webdoc init}. Locates {cmd:header.html} in the
-adopath (or a file you specify) and injects it into the document {cmd:<head>}.
+working directory or on the adopath (or a file you specify) and injects it
+into the document {cmd:<head>}. If no {cmd:header.html} is found, it uses the
+identical built-in copy stored in {cmd:_webdoc2_header.ado}, so a plain
+{cmd:net install} or {cmd:ssc install} works without {cmd:net get}.
 This enables the Bootstrap 5 accordion, responsive navbar, back-to-top button,
 and the TOC without any manual {cmd:header()} options.
 
 {p2colset 9 30 30 2}
-{p2col:{cmd:headerfile(}{it:path}{cmd:)}}Path to a custom header file.
-Default: {cmd:header.html} from the adopath. Use this to apply a completely
-different Bootstrap theme without changing your do-file.{p_end}
-{p2col:{it:other options}}All standard {cmd:webdoc init} options pass through
-unchanged (e.g. {cmd:replace}, {cmd:logall}, {cmd:grdir()}).{p_end}
+{p2col:{cmd:headerfile(}{it:path}{cmd:)}}Path to a custom header file:
+absolute, relative to the working directory, starting with {cmd:~/} (your
+home folder), or a file name on the adopath.
+Default: {cmd:header.html}, else the built-in header. Use this to apply a
+completely different Bootstrap theme without changing your do-file.{p_end}
+{p2col:{it:other options}}Other {cmd:webdoc init} options pass through
+unchanged (e.g. {cmd:replace}, {cmd:grdir()}).{p_end}
 {p2colreset}{...}
 
 {phang}{bf:Logging Shortcuts}
 
 {phang2}
-{cmd:wd} / {cmd:wdclose}: Wraps a block of Stata output in a plain
-{cmd:webdoc stlog} section — output appears inline on the page.
+{cmd:wd} [{it:name}] [{cmd:,} {it:options}] / {cmd:wdclose}: Wraps a block
+of Stata output in a plain {cmd:webdoc stlog} section — output appears inline
+on the page. {it:options} are {cmd:webdoc stlog} options, except
+{cmd:nooutput}, {cmd:nodo}, {cmd:cmdlog}, and {cmd:dosave}: {cmd:webdoc do}
+applies those only to literal {cmd:webdoc stlog} lines it finds when it scans
+the do-file, and a program such as {cmd:wd} cannot apply them itself, so
+{cmd:wd} stops with r(198) instead of publishing output you meant to hide.
+Write {cmd:webdoc stlog, nooutput} ... {cmd:webdoc stlog close} for those
+sections. {cmd:wd} also stops if the document was initialized with
+{cmd:nooutput}, unless you type {cmd:wd, output}.
 
 {phang}{bf:Interactive Bootstrap Accordions}
 
@@ -396,9 +411,13 @@ Example:
 {title:Installation}
 
 {pstd}
-{bf:Adopath Setup:} Ensure the directory containing the {cmd:webdoc2} package
-files is in your Stata adopath. {cmd:wdinit} uses {cmd:findfile} to locate
-{cmd:header.html}, so the package directory must be on the path.
+{cmd:net install webdoc2} (or {cmd:ssc install webdoc2}) is enough: {cmd:wdinit}
+uses the built-in header when {cmd:header.html} is not installed.
+{cmd:net install} does not copy {cmd:header.html} (an ancillary file); to get
+an editable copy for a custom theme, run {cmd:net get webdoc2} (or
+{cmd:ssc install webdoc2, all}), which places it in the working directory.
+A {cmd:header.html} in the working directory or on the adopath takes
+precedence over the built-in copy.
 
 
 {marker troubleshooting}{...}
@@ -414,12 +433,13 @@ If {cmd:webdoc} fails to close a temp file, Stata reports:{break}
 {cmd:rm "paste_path_here"}{break}
 then re-run {cmd:webdoc2}.
 
-{phang}{bf:wdinit: header.html not found}{p_end}
+{phang}{bf:wdinit: header.html not found ... built-in header is not installed}{p_end}
 {pstd}
-Verify the webdoc2 package directory is in {cmd:adopath}. To check:{break}
-{cmd:adopath}{break}
-Add the directory with {cmd:adopath + "your/path"} or in your {cmd:profile.do}.
-To use a custom theme file instead: {cmd:wdinit myfile, replace headerfile("myheader.html")}.
+Since version 1.1.5 this appears only when {cmd:_webdoc2_header.ado} is missing
+too, for example after copying the .ado files by hand. Reinstall with
+{cmd:net install webdoc2, replace}, fetch {cmd:header.html} with
+{cmd:net get webdoc2}, or name a theme file:
+{cmd:wdinit myfile, replace headerfile("myheader.html")}.
 
 
 {marker tips}{...}
@@ -569,6 +589,21 @@ Open {hi:myreport.html} in a browser to see the result.
 The accordion buttons collapse/expand, the navbar scrolls and collapses
 on small screens, the TOC links jump to each section, and the
 floating back-to-top button appears after scrolling down.
+
+
+{marker history}{...}
+{title:Version history}
+
+{pstd}
+{bf:1.1.5} (09nov2026): {cmd:wdimg} width() and alt() reach the HTML;
+{cmd:wd} rejects nooutput, nodo, cmdlog, and dosave (which it silently
+ignored, publishing output meant to be hidden); {cmd:webdoc2, logall} is rejected with a
+clear message instead of r(499); {cmd:wdinit} no longer leaks a file handle
+per build (r(3611) after 48 builds in one session), falls back to a built-in
+header when {cmd:header.html} was not installed, and accepts absolute and
+{cmd:~/} paths in headerfile().{p_end}
+{pstd}
+{bf:1.1.4} (08nov2026): {cmd:wdnavbar} brandhref() is accepted.{p_end}
 
 
 {marker author}{...}

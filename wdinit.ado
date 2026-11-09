@@ -1,6 +1,10 @@
 *! wdinit - webdoc init with Bootstrap 5 header injection
 *!          Default: finds header.html in adopath / working directory.
 *!          Custom:  wdinit myfile, replace headerfile("mytheme.html")
+*! 2026-11-09 (webdoc2 1.1.5): built-in header fallback when header.html is
+*!   not installed; headerfile() accepts absolute and ~ paths; the stray
+*!   auto-init document's file handle is closed (no more r(3611) after 48
+*!   builds in one session).
 *cap program drop wdinit
 program define wdinit
 version 14
@@ -11,24 +15,53 @@ syntax [anything(id="document name")] [, HEADERFile(string) *]
 
 * Determine which header file to inject
 if `"`headerfile'"' == "" {
-    * Default: locate header.html in adopath / working directory
+    * Default: header.html in the working directory or on the adopath; else
+    * the built-in copy in _webdoc2_header.ado. net install treats
+    * header.html as an ancillary file and does not copy it, so before 1.1.5
+    * a plain net/ssc install stopped here with r(601).
     cap findfile "header.html"
-    if _rc != 0 {
-        di as err "wdinit: header.html not found in adopath or working directory."
-        di as err "       Ensure the webdoc2 package directory is in your adopath,"
-        di as err "       or specify a custom file with the headerfile() option."
-        exit 601
+    if _rc == 0 {
+        local hpath `"`r(fn)'"'
     }
-    local hpath `"`r(fn)'"'
+    else {
+        cap findfile "_webdoc2_header.ado"
+        if _rc != 0 {
+            di as err "wdinit: header.html not found in the working directory or on the adopath,"
+            di as err "       and the built-in header (_webdoc2_header.ado) is not installed."
+            di as err "       Reinstall webdoc2, fetch header.html with -net get webdoc2-,"
+            di as err "       or name a theme file with the headerfile() option."
+            exit 601
+        }
+        tempfile hpath
+        _webdoc2_header `"`hpath'"'
+    }
 }
 else {
-    * User-specified header file
-    cap findfile `"`headerfile'"'
-    if _rc != 0 {
-        di as err `"wdinit: header file not found: `headerfile'"'
-        exit 601
+    * User-specified header file. findfile searches only the adopath, so it
+    * rejects absolute and ~ paths; try the path as given first.
+    local hf `"`macval(headerfile)'"'
+    if `"`hf'"' == "~" | inlist(substr(`"`hf'"', 1, 2), "~/", "~\") {
+        local home : env HOME
+        if `"`home'"' == "" local home : env USERPROFILE
+        if `"`home'"' == "" {
+            local hd : env HOMEDRIVE
+            local hp : env HOMEPATH
+            local home `"`hd'`hp'"'
+        }
+        if `"`home'"' != "" local hf `"`home'`=substr(`"`hf'"', 2, .)'"'
     }
-    local hpath `"`r(fn)'"'
+    cap confirm file `"`hf'"'
+    if _rc == 0 {
+        local hpath `"`hf'"'
+    }
+    else {
+        cap findfile `"`hf'"'
+        if _rc != 0 {
+            di as err `"wdinit: header file not found: `macval(headerfile)'"'
+            exit 601
+        }
+        local hpath `"`r(fn)'"'
+    }
 }
 
 * Compute and expose the absolute HTML path for webdoc2findreplace.
@@ -66,7 +99,16 @@ if `"${WebDoc_dofile}"' != "" & `"${WebDoc_docname}"' != "" {
                 " r(602) unless replace is passed to -webdoc do- itself."
         }
         else {
-            capture mata: webdoc_closeout_fh(${WebDoc_docname_FH})
+            * webdoc_closeout_fh() lives in webdoc.ado and is private to it,
+            * so calling it from here always failed (r(3499), hidden by
+            * capture) and leaked one file handle per build; after 48 builds
+            * in a session every build died with r(3611). _fclose() is
+            * built in. Set the global to missing so webdoc's own cleanup
+            * does not close the reused handle number a second time.
+            if `"${WebDoc_docname_FH}"' != "" & `"${WebDoc_docname_FH}"' != "." {
+                capture mata: (void) _fclose(${WebDoc_docname_FH})
+                global WebDoc_docname_FH "."
+            }
             capture quietly checksum `"`straydoc'"'
             if _rc == 0 & r(filelen) == 0 {
                 capture erase `"`straydoc'"'

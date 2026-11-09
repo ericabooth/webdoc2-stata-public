@@ -18,7 +18,7 @@ d KW: reproducible research
 d
 d Author: Eric A. Booth, Sr Researcher, Texas 2036
 d Support: eric.a.booth@gmail.com
-d Distribution-Date: 20261108
+d Distribution-Date: 20261109
 d
 f webdoc2.ado
 f webdoc2.sthlp
@@ -40,6 +40,7 @@ f wdnavdropdown.ado
 f wdnavdropdownitem.ado
 f wdnavdropdownclose.ado
 f wdinit.ado
+f _webdoc2_header.ado
 f wdtoc.ado
 f wdwidth.ado
 f wdiframe.ado
