@@ -22,6 +22,6 @@ SOFTWARE.
 
 ---
 
-webdoc2 is a wrapper around -webdoc- by Ben Jann (ETH Zürich), distributed
+webdoc2 is a wrapper around -webdoc- by Ben Jann (University of Bern), distributed
 separately on SSC under its own license. webdoc2 does not redistribute any
 of webdoc's source code.

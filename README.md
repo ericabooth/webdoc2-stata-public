@@ -209,23 +209,24 @@ See [examples/mwe_full.do](examples/mwe_full.do) for a longer reference that exe
 
 | Command | What it emits |
 | --- | --- |
-| `wdinit NAME, replace` | Open a report (Bootstrap‑5 header injected). Use the **bare** name, NOT quoted. |
+| `wdinit [NAME] [, replace headerfile(PATH) webdoc-init-options]` | Open a report (Bootstrap‑5 header injected). Quote a name with spaces. Without a name the report is `DOFILE.html`. |
 | `webdoc close` | Close and write the HTML. (Last line of every do‑file.) |
 | `wput TEXT` | `<p>TEXT</p>` |
 | `wputh1 TEXT` / `wputh2` / `wputh3` | `<h1 id="auto-slug">TEXT</h1>` — the `id` is auto-derived from the text |
-| `wd` … `wdclose` | Inline logged code block (`webdoc stlog`) |
+| `wd [NAME] [, stlog-options]` … `wdclose` | Inline logged code block (`webdoc stlog`; not `nooutput`/`nodo`/`cmdlog`/`dosave`) |
 | `button` … `buttonclose` | Collapsible "Click to view code" panel (runs the code, logs the output) |
 | `graphbutton` … `graphbuttonclose` | Same as `button` but for graphs — pair with `wgraph` inside the block |
-| `wgraph, width(N)` | Export the last graph at width `N` (pixels) — use inside `graphbutton`/`graphbuttonclose` |
-| `wdnavbar BRAND` … `wdnavbarclose` | Responsive sticky navbar |
+| `wgraph [NAME] [, width(N) webdoc-graph-options]` | Export the last graph (as `NAME.png` when named) at width `N` pixels — use inside `graphbutton`/`graphbuttonclose` |
+| `wdnavbar BRAND [, color() bg() brandhref(URL) id()]` … `wdnavbarclose` | Responsive sticky navbar (defaults `navbar-dark`, `bg-dark`, `#`, `mainNavbar`) |
 | `wdnavitem LABEL, href(URL) [active]` | Top‑level nav link (external URL or subpage) |
-| `wdnavdropdown LABEL` … `wdnavdropdownclose` | Dropdown menu inside the navbar |
+| `wdnavdropdown LABEL [, id()]` … `wdnavdropdownclose` | Dropdown menu inside the navbar |
 | `wdnavdropdownitem LABEL, href(#anchor)` | One item inside a dropdown — `#anchor` matches a `wputh*` auto‑id |
-| `wdtoc TITLE, depth(N)` | In‑page table of contents (JS auto‑fills with heading links) |
+| `wdtoc [TITLE] [, depth(N) id() center indent(CSS length)]` | In‑page table of contents (JS auto‑fills with heading links) |
 | `wdwidth 1100px` | Override page content width (any CSS length; default 90%) |
-| `wdimg PATH, caption(TEXT)` | Static image, optionally wrapped in `<figure>` |
-| `wdiframe SRC, height(H)` | Embed an iframe (dashboards, sub‑reports) |
+| `wdimg PATH [, width() alt() caption(TEXT) src()]` | Static image, optionally wrapped in `<figure>` |
+| `wdiframe SRC [, width() height(H) class() border src()]` | Embed an iframe (dashboards, sub‑reports) |
 | `wdlist` / `wditemize` / `wdenumerate` … `wditem TEXT` … `wdlistend` | Dashed / round / numbered lists |
+| `webdoc2 help` | Check that `webdoc` and the header are found, then show the help file |
 
 Full reference: `help webdoc2` after install.
 
@@ -240,9 +241,11 @@ webdoc2 myreport.do [, open cleanup OPTIONS]
 | Option | What it does |
 | --- | --- |
 | `open` | After build, open the HTML in your default browser (`open` on macOS, `start` on Windows, `xdg-open` on Linux). |
-| `cleanup` | Delete intermediate `.log` / `.smcl` files generated for each `wd`/`button`/`graphbutton` block. PNG/JPG graph files are kept (the HTML references them). |
-| `replace` | Passed through to `webdoc do` — overwrites existing HTML. |
-| other | Any other option is passed through to `webdoc do` unchanged (e.g. `grdir()`). `logall` is rejected with r(198): it would wrap `wdinit` and the other webdoc2 commands in stlog sections, which stopped every build with r(499). |
+| `cleanup` | Delete the intermediate `REPORT_1.log`, `REPORT_2.log`, … (and `.smcl`) files generated for each `wd`/`button`/`graphbutton` block. PNG/JPG graph files are kept (the HTML references them), and so is a `REPORT.log` of your own. |
+| `replace` | Not needed: `webdoc2` always passes `replace` to `webdoc do`, so rebuilding over an existing report works. |
+| other | Any other option is passed through to `webdoc do` unchanged (e.g. `grdir()`, `cd`). `logall` is rejected with r(198): it would wrap `wdinit` and the other webdoc2 commands in stlog sections, which stopped every build with r(499). |
+
+A relative `wdinit` name is relative to Stata's working directory, not to the do-file: `webdoc2 sub/report.do` run from the parent folder writes `report.html` in the parent folder. Build from the do-file's folder, or add webdoc's `cd` option (`webdoc2 sub/report.do, cd`).
 
 ---
 
@@ -250,10 +253,10 @@ webdoc2 myreport.do [, open cleanup OPTIONS]
 
 These are the lessons from building real reports with `webdoc2`. The help file documents them too; the highlights:
 
-1. **`wdinit NAME` must be a bare name, NOT quoted.** `wdinit "report"` breaks `button`/`buttonclose` accordion handling inside the build.
+1. **Heading slugs are ASCII only.** `wputh1 Résumé` gets `id="r-sum"`: accented letters are dropped. For such headings, write the tag yourself with `webdoc put <h1 id="resume">Résumé</h1>`.
 2. **`button … buttonclose` RUNS the code between them.** It does not just *show* it. To display a sample command in docs, use `webdoc put` with `<pre>` HTML, or escape the command.
 3. **Don't put `/*` inside any `wput` / `wputh*` text.** Stata reads `/*` as the start of a block comment and swallows the rest of the do‑file. Use HTML entities (`&#42;`) or rephrase.
-4. **Use plain `""` quotes inside `button`/`buttonclose` blocks**, not Stata's compound `` `"..."' ``. Compound quotes get logged into the HTML and then trip Stata's parser when `webdoc2findreplace` re-reads the file.
+4. **Compound quotes inside logged blocks are fine since 1.1.6.** Before, a long command with `` `"..."' `` that wrapped across lines in the log made the post-build scrub fail with r(132).
 5. **Apostrophes in possessives** (`Radyakin's`) terminate macro references mid-string. Phrase as "by X" or use `&#39;`.
 6. **`wdnavbar*` and `wdwidth` go OUTSIDE any `wd`/`button` block.** They emit HTML structure; the logger interprets them as Stata commands inside a stlog.
 7. **`else` must be on the same physical line as the preceding `}`.** Standalone `else if` lines silently fall through inside `webdoc do`.
@@ -281,7 +284,7 @@ A stale tempfile from a prior crashed build. Copy the full path from the error, 
 
 **`invalid syntax` after `buttonclose` / `wdclose` etc.**
 
-Almost always (a) compound quotes inside the block, (b) an unclosed `wd`/`button`/`graphbutton`, or (c) a leftover `else` on its own line. See the gotchas list.
+Almost always (a) an unclosed `wd`/`button`/`graphbutton`, or (b) a leftover `else` on its own line. See the gotchas list. `webdoc2 help` checks that `webdoc` and the header are found.
 
 **The HTML built but the iframe is blank.**
 
@@ -297,6 +300,7 @@ Example site it produces is here: [https://ericabooth.github.io/Webdoc2_Example_
 
 ## Version history
 
+- **1.1.6** (2026-11-09): `webdoc2` parses `replace` as an option instead of deleting the word from every option (`grdir(replacefigs)` became `grdir(figs)`); `webdoc2 help` checks the environment and returns 0 instead of ending with r(198); a report next to a do-file run from another folder is no longer emptied and deleted; `cleanup` no longer erases `REPORT.log`, which webdoc never writes; a wrapped compound-quoted command no longer fails the build with r(132); `open` uses the absolute path and expands `~`; quoted names and labels in `wdinit`, `wdnavbar`, `wdnavitem`, `wdnavdropdown`, `wdnavdropdownitem`, and `wdtoc` lose their quotes; a bare `wdinit` works; each accordion gets its own id; `wgraph` passes the graph name to `webdoc graph`.
 - **1.1.5** (2026-11-09): `wdimg` width() and alt() reach the HTML; `wd` rejects `nooutput`, `nodo`, `cmdlog`, and `dosave` (it silently ignored them, publishing output meant to be hidden); `webdoc2, logall` stops with a clear message instead of r(499); `wdinit` no longer leaks a file handle per build (r(3611) after 48 builds in one session), falls back to a built-in header when `header.html` was not installed, and accepts absolute and `~/` paths in `headerfile()`.
 - **1.1.4** (2026-11-08): `wdnavbar` brandhref() is accepted.
 

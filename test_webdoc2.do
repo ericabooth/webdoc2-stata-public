@@ -1,5 +1,5 @@
 *==============================================================================*
-* test_webdoc2.do -- battery for webdoc2 v1.1.5
+* test_webdoc2.do -- battery for webdoc2 v1.1.6
 * Run:  stata-mp -b do test_webdoc2.do ["/path/to/pkg"]
 * Requires Ben Jann's webdoc (ssc install webdoc), which webdoc2 wraps.
 * webdoc commands act only while -webdoc do- is processing a do-file, so the
@@ -257,6 +257,95 @@ else di as txt "TEST 12 partial: another header.html is on the adopath (`r(fn)')
 adopath - "`site'/nohdr"
 adopath ++ "$pkgroot"
 discard
+
+*--- (13) replace is an option, not a substring to delete (1.1.6) -----------
+mkdir "`site'/replacefigs"
+mkdir "`site'/figs"
+file open h using "gr.do", write replace
+file write h "wdinit grpage, replace" _n "graphbutton" _n "sysuse auto, clear" _n
+file write h "scatter price mpg" _n "wgraph named13" _n "graphbuttonclose" _n "webdoc close" _n
+file close h
+webdoc2 gr.do, replace grdir(replacefigs) cleanup
+confirm file "`site'/replacefigs/named13.png"
+local g : dir "`site'/figs" files "*.png"
+assert `"`g'"' == ""
+di as res "TEST 13 OK: grdir(replacefigs) kept; wgraph passes its name"
+
+*--- (14) quoted names and labels lose their quotes (1.1.6) -------------------
+file open h using "q.do", write replace
+file write h `"wdinit "qpage", replace"' _n
+file write h `"wdnavbar "Quoted Brand", brandhref(home.html)"' _n
+file write h `"wdnavitem "Quoted Item", href(a.html)"' _n
+file write h `"wdnavbarclose"' _n
+file write h `"wdtoc "Quoted Toc""' _n
+forvalues k = 1/2 {
+    file write h "button" _n `"display "b`k'""' _n "buttonclose" _n
+}
+file write h `"webdoc close"' _n
+file close h
+global tttt1 ""
+webdoc2 q.do, cleanup
+local html = fileread("`site'/qpage.html")
+assert strpos(`"`html'"', `"href="home.html">Quoted Brand</a>"') > 0
+assert strpos(`"`html'"', `"href="a.html">Quoted Item</a>"') > 0
+assert strpos(`"`html'"', `"wd-toc-title">Quoted Toc</strong>"') > 0
+assert strpos(`"`html'"', `"id="wdAcc1""') > 0 & strpos(`"`html'"', `"id="wdAcc2""') > 0
+assert strpos(`"`html'"', "accordionExample") == 0
+di as res "TEST 14 OK: quoted wdinit/wdnavbar/wdnavitem/wdtoc; unique accordion ids"
+
+*--- (15) bare wdinit keeps webdoc's default document (1.1.6) -----------------
+file open h using "bare.do", write replace
+file write h "wdinit" _n "wput hello bare" _n "webdoc close" _n
+file close h
+webdoc2 bare.do
+local html = fileread("`site'/bare.html")
+assert strpos(`"`html'"', "hello bare") > 0 & strpos(lower(`"`html'"'), "bootstrap") > 0
+di as res "TEST 15 OK: bare wdinit builds bare.html with the header"
+
+*--- (16) wrapped compound-quoted command; cleanup keeps the user's log ------
+file open h using "ml.log", write replace
+file write h "MY OWN LOG" _n
+file close h
+file open h using "ml.do", write replace
+file write h "wdinit ml, replace" _n "wd" _n `"local who "world""' _n
+file write h "display " _char(96) _char(34) "Hello " _char(96) "who' this is a deliberately long compound-quoted display command that wraps past the log linesize" _char(34) "'" _n
+file write h "wdclose" _n "webdoc close" _n
+file close h
+webdoc2 ml.do, cleanup
+confirm file "`site'/ml.log"
+confirm new file "`site'/ml_1.log"
+local html = fileread("`site'/ml.html")
+assert strpos(`"`html'"', "<span class=" + char(34) + "stinp" + char(34) + ">. wdclose") == 0
+di as res "TEST 16 OK: no r(132) on wrapped compound quotes; ml.log kept"
+
+*--- (17) a report next to a do-file run from elsewhere survives (1.1.6) ------
+mkdir "`site'/sub"
+file open h using "sub/rerun.do", write replace
+file write h "wdinit rerun, replace" _n "wput hello rerun" _n "webdoc close" _n
+file close h
+cd "`site'/sub"
+webdoc2 rerun.do
+cd "`site'"
+checksum "`site'/sub/rerun.html"
+local len0 = r(filelen)
+webdoc2 sub/rerun.do
+checksum "`site'/sub/rerun.html"
+assert r(filelen) == `len0' & `len0' > 0
+confirm file "`site'/rerun.html"
+di as res "TEST 17 OK: sub/rerun.html kept when built from the parent folder"
+
+*--- (18) relative subfolder name + cd in the do-file; help returns 0 --------
+mkdir "`site'/out"
+mkdir "`site'/other"
+file open h using "cd.do", write replace
+file write h "wdinit out/cdtest, replace" _n "wd" _n `"display "x""' _n "wdclose" _n "cd other" _n "webdoc close" _n
+file close h
+webdoc2 cd.do, cleanup
+cd "`site'"
+confirm new file "`site'/out/cdtest_1.log"
+capture noisily webdoc2 help
+assert _rc == 0
+di as res "TEST 18 OK: cleanup finds out/cdtest after cd; webdoc2 help returns 0"
 
 cd "`wd0'"
 mata: _wd2t_rmtree(st_local("site"))

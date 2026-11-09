@@ -1,10 +1,18 @@
 *! wdinit - webdoc init with Bootstrap 5 header injection
+*! version 1.1.6 20261109 Eric Booth (part of webdoc2)
 *!          Default: finds header.html in adopath / working directory.
 *!          Custom:  wdinit myfile, replace headerfile("mytheme.html")
 *! 2026-11-09 (webdoc2 1.1.5): built-in header fallback when header.html is
 *!   not installed; headerfile() accepts absolute and ~ paths; the stray
 *!   auto-init document's file handle is closed (no more r(3611) after 48
 *!   builds in one session).
+*! 2026-11-09 (webdoc2 1.1.6): outer quotes on the document name are removed
+*!   (wdinit "report" made a file named "report".html); a bare wdinit keeps
+*!   webdoc's default document (<dofile>.html) instead of failing with r(198);
+*!   $webdoc2htmlpath is webdoc's absolute ${WebDoc_docname}, so a relative
+*!   subfolder name or a cd inside the do-file no longer misleads webdoc2;
+*!   the rerun note is not shown when webdoc2 runs the build (it passes
+*!   replace).
 *cap program drop wdinit
 program define wdinit
 version 14
@@ -12,6 +20,9 @@ version 14
 * substring, and the malformed form made a typed headerfile() fall through
 * to the * catch-all silently -- the option never worked as documented.
 syntax [anything(id="document name")] [, HEADERFile(string) *]
+* syntax keeps outer quotes in anything; webdoc init got them back as part
+* of the name, giving "report".html and a broken buttonclose.
+local anything `anything'
 
 * Determine which header file to inject
 if `"`headerfile'"' == "" {
@@ -64,18 +75,19 @@ else {
     }
 }
 
-* Compute and expose the absolute HTML path for webdoc2findreplace.
-* webdoc init appends .html if not already present; we mirror that logic.
-local htmlfn `anything'
+* Bare wdinit: keep the document webdoc do opened for this do-file
+* (<dofile>.html) and only add the header. webdoc init without a name
+* updates the open document; with an empty quoted name it failed r(198).
+if `"`anything'"' == "" {
+    webdoc init, `macval(options)' header2(include(`"`hpath'"'))
+    global webdoc2htmlpath `"${WebDoc_docname}"'
+    exit
+}
+
+* The document file name, as webdoc init will form it (.html appended)
+local htmlfn `"`anything'"'
 if lower(substr(`"`htmlfn'"',-5,.)) != ".html" {
     local htmlfn `"`htmlfn'.html"'
-}
-* Prepend CWD if the path is relative (no leading / or \)
-if strpos(`"`htmlfn'"', "/") == 0 & strpos(`"`htmlfn'"', "\") == 0 {
-    global webdoc2htmlpath `"`c(pwd)'/`htmlfn'"'
-}
-else {
-    global webdoc2htmlpath `"`htmlfn'"'
 }
 
 * -webdoc do- prepends its own optionless `webdoc init "<dofile basename>"'
@@ -94,9 +106,12 @@ if `"${WebDoc_dofile}"' != "" & `"${WebDoc_docname}"' != "" {
             * Same name for document and do-file: the stray IS the target, so
             * it cannot be removed here. The rerun still breaks unless webdoc
             * do itself gets the replace option; warn instead of failing later.
-            di as txt "note: wdinit document name matches the do-file name;" ///
-                " rerunning -webdoc do- in this directory will fail with" ///
-                " r(602) unless replace is passed to -webdoc do- itself."
+            * webdoc2 always passes replace, so the note is for webdoc do only.
+            if `"${webdoc2_running}"' == "" {
+                di as txt "note: wdinit document name matches the do-file name;" ///
+                    " rerunning -webdoc do- in this directory will fail with" ///
+                    " r(602) unless replace is passed to -webdoc do- itself."
+            }
         }
         else {
             * webdoc_closeout_fh() lives in webdoc.ado and is private to it,
@@ -120,4 +135,8 @@ if `"${WebDoc_dofile}"' != "" & `"${WebDoc_docname}"' != "" {
 * Call webdoc init, injecting the header file into <head> via include()
 * All other options (replace, logall, grdir, etc.) pass through via `options'
 webdoc init `"`anything'"', `macval(options)' header2(include(`"`hpath'"'))
+* webdoc stores the absolute document path; webdoc2 uses it for the
+* closing-command scrub, cleanup and open (a relative name such as
+* out/report went wrong when the do-file changed directory).
+global webdoc2htmlpath `"${WebDoc_docname}"'
 end

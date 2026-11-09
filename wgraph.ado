@@ -2,5 +2,6 @@
 program define  wgraph
 version 14
 syntax [anything(equalok)] [, *]
-webdoc graph , `options'
+* 1.1.6: pass the graph name through (it was dropped silently)
+webdoc graph `anything', `options'
 end

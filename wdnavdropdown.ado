@@ -6,7 +6,8 @@
 program define wdnavdropdown
 version 14
 syntax [anything(equalok everything)] [, Id(string)]
-local anything = `"`anything'"'
+* 1.1.6: strip outer quotes (a quoted label kept them in the HTML)
+local anything `anything'
 if `"`anything'"' == "" local anything "Contents"
 if "${tttt2}"    == "" global tttt2 = 0
 global tttt2 = ${tttt2} + 1

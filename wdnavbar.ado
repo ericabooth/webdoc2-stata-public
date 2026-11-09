@@ -6,7 +6,8 @@
 program define wdnavbar
 version 14
 syntax [anything(equalok everything)] [, Color(string) Bg(string) BRANDhref(string) Id(string)]
-local anything = `"`anything'"'
+* 1.1.6: strip outer quotes (a quoted label kept them in the HTML)
+local anything `anything'
 if "`color'"     == "" local color     "navbar-dark"
 if "`bg'"        == "" local bg        "bg-dark"
 if "`brandhref'" == "" local brandhref "#"
